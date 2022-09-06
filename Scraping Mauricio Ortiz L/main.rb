@@ -2,7 +2,6 @@ require 'open-uri' #consultar a la plataforma o sitio web
 require 'nokogiri' #formatear, parsear a html
 require 'csv' #escribir y leer csv
 
-
 puts ''
 puts "------------------Scraping games------------------"
 puts ''
@@ -13,8 +12,8 @@ datosStr = datosHTML.read
 parsed_content = Nokogiri::HTML(datosStr)
 val=0
 
-CSV.open('games.csv', 'w') do |csv|
-  csv << ['Num.', 'Name', 'Rating', 'Price', 'Languajes', 'Developers', 'Generes']
+CSV.open('./P&V Mauricio Ortiz L/games.csv', 'w') do |csv|
+  csv << ['Num.', 'Name', 'Rating', 'Price', 'Achievements', 'Languajes', 'Developers', 'Generes']
   puts 'Num. - Name - Rating - Price - Languajes - Developers - Generes'
   parsed_content.css('div#search_resultsRows > a.search_result_row').each do |fila|
     link = fila['href']
@@ -48,6 +47,12 @@ CSV.open('games.csv', 'w') do |csv|
     if developers.length() == 0
       developers = "No developers"
     end
+
+    achievements = '0'
+    ach = parsed_page.css('#achievement_block a.communitylink_achievement').inner_text().split().at(1)
+    if ach != nil
+      achievements=ach
+    end
     
     generes = ""
     parsed_page.css('#genresAndManufacturer > span > a').each do |gen|
@@ -57,14 +62,12 @@ CSV.open('games.csv', 'w') do |csv|
     if generes.length() == 0
       generes = "No generes"
     end
-    
+
     val+=1
-    csv << [val.to_s(), name, rating, price.at(0).split("$").at(1), languages.to_s(), developers.to_s(), generes.to_s()]
-    puts val.to_s+' - '+name+' - '+rating+' - $'+price.at(0).split("$").at(1)+' - '+languages.to_s+' - '+developers.to_s+' - '+generes.to_s
-    
+    csv << [val.to_s(), name, rating, price.at(0).split("$").at(1), achievements, languages.to_s(), developers.to_s(), generes.to_s()]
+    puts val.to_s+' - '+name+' - '+rating+' - $'+price.at(0).split("$").at(1)+' - '+achievements+' - '+languages.to_s+' - '+developers.to_s+' - '+generes.to_s
   end
 end
-
 
 puts ''
 puts "------------------This is the end------------------"
