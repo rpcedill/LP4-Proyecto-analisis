@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("my_data.csv")
 
 #Limpieza
+df["Desarrollador"] = df["Desarrollador"].str.strip('Desarrollador')
+df["Desarrollador"] = df["Desarrollador"].str.strip('"')
+
 df["Género"] = df["Género"].str.replace("Acció","Acción")
 df["Género"] = df["Género"].str.replace("Acciónn","Acción")
 
@@ -91,3 +94,18 @@ literal2["Popularidad"] = literal2["Popularidad"].str.strip("").astype("int64")
 literal2[['Rol', 'Acción', 'Deportes', 'Estrategia', 'Aventura', 'Otros', 'Conducción', 'Simulación']] = pd.get_dummies(literal2["Género"])
 literal2[['1', 'Cooperativo', 'Multijugador', 'Masivo', 'Competitivo']] = pd.get_dummies(literal2["Jugadores"])
 print(literal2.corr())
+
+top =df.groupby('Desarrollador')['Nombre'].count().reset_index().sort_values(by=['Nombre'], ascending=False).head(10)["Desarrollador"].unique()
+literal3 = pd.DataFrame()               
+for i in range(top.size):
+    literal3 = pd.concat([df[df["Desarrollador"]==top[i]], literal3], axis=0)
+literal3.reset_index(inplace=True, drop=True)
+literal31 = literal3.groupby('Género')['Nombre'].count().reset_index()
+literal31['Cantidad'] = literal31['Nombre']
+fig,ax = plt.subplots(figsize=(12,8))
+ax = sns.barplot(data=literal31.sort_values(by="Cantidad", ascending = False)
+, x="Cantidad", y="Género", orient="h")
+fig.show()
+
+
+df.to_csv('dataFinal.csv',sep=';')
